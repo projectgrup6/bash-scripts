@@ -1,0 +1,14 @@
+#!usr/bin/bash
+string="param";
+{
+for i in $((( ${#string} + 1 )) $seq 0 );
+do
+echo ${{#string}-i:0:$string};
+done
+} | tac;
+{
+for j in $( seq 0 $(( ${#string} + 1 )) );
+do
+echo ${string:0:${#string}-j};
+done
+}
