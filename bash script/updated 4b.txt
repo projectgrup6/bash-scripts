@@ -1,0 +1,8 @@
+#!usr/bin/bash
+read -p "enter the string:" input
+length=${#input}
+for((i=length;i>=0;i--));
+do
+substring=${input:0:i}
+echo "$substring"
+done
