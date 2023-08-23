@@ -1,0 +1,65 @@
+#!/usr/bin/bash
+
+while getopts ":p:c:" opt; do
+  case $opt in
+    p)
+      PLATFORM=$OPTARG
+      ;;
+    c)
+      COMMAND=$OPTARG
+      ;;
+    \?)
+      echo "Invalid option: -$OPTARG" >&2
+      exit 1
+      ;;
+    :)
+      echo "Option -$OPTARG requires an argument." >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [ -z "$PLATFORM" ] || [ -z "$COMMAND" ]; then
+  echo "Usage: $0 -p platform -c command"
+  exit 1
+fi
+
+if [ "$PLATFORM" = "minikube" ]; then
+  # Set context to Minikube
+  kubectl config use-context minikube
+
+  if [[ "$COMMAND" = "deploy" || "$COMMAND" = "deploy-complete" ]]; then
+    # Create namespaces
+    kubectl create namespace namespace1
+    kubectl create namespace namespace2
+
+   # Create four pods in the first namespace
+  kubectl create deployment pod1-namespace1 --image=nginx --namespace=namespace1
+  kubectl create deployment pod2-namespace1 --image=nginx --namespace=namespace1
+  kubectl create deployment pod3-namespace1 --image=nginx --namespace=namespace1
+  kubectl create deployment pod4-namespace1 --image=nginx --namespace=namespace1
+  # Create four pods in the second namespace
+  kubectl create deployment pod1-namespace2 --image=nginx --namespace=namespace2
+  kubectl create deployment pod2-namespace2 --image=nginx --namespace=namespace2
+  kubectl create deployment pod3-namespace2 --image=nginx --namespace=namespace2
+  kubectl create deployment pod4-namespace2 --image=nginx --namespace=namespace2
+
+
+    # Creating Service
+    if [ "$COMMAND" = "deploy-complete" ]; then
+    kubectl apply -f service-namespace1.yaml -n namespace1
+    kubectl apply -f service-namespace2.yaml -n namespace2
+    fi
+  else
+    echo "Unknown command: $COMMAND"
+    exit 1
+  fi
+else
+  echo "Unsupported platform: $PLATFORM"
+  exit 1
+fi
+
+
+ 
+# Input:  ./shell-script -p minikube -c deploy    (Deploy deployment i.e. create namespace with sample 4 pods)
+# Input:  ./shell-script -p minikube -c deploy-complete    (create ns with pods and services to communicate between them, mention as the service is created)
